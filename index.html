@@ -1,1 +1,732 @@
+<!DOCTYPE html>
 
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Transfer - Firebase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+```
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    /* Login Screen Styles */
+    .login-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        padding: 40px;
+    }
+
+    .login-box {
+        background: white;
+        padding: 40px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .lock-icon {
+        font-size: 4rem;
+        color: #4f46e5;
+        margin-bottom: 20px;
+    }
+
+    .login-title {
+        color: #1e293b;
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+        color: #64748b;
+        margin-bottom: 30px;
+    }
+
+    .password-input {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .password-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .login-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .login-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .error-message {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+
+    /* Main App Styles */
+    .main-app {
+        display: none;
+    }
+
+    .logout-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+        background: rgba(255,255,255,0.3);
+    }
+
+    .content {
+        padding: 40px;
+    }
+
+    .upload-section {
+        background: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 15px;
+        padding: 40px;
+        text-align: center;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+    }
+
+    .upload-section:hover {
+        border-color: #4f46e5;
+        background: #f1f5f9;
+    }
+
+    .upload-section.dragover {
+        border-color: #4f46e5;
+        background: #eef2ff;
+        transform: scale(1.02);
+    }
+
+    .upload-icon {
+        font-size: 4rem;
+        color: #64748b;
+        margin-bottom: 20px;
+    }
+
+    .file-input {
+        display: none;
+    }
+
+    .upload-btn {
+        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 10px;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        margin: 20px 0;
+        overflow: hidden;
+        display: none;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5, #7c3aed);
+        width: 0%;
+        transition: width 0.3s ease;
+    }
+
+    .files-list {
+        margin-top: 30px;
+    }
+
+    .files-list h3 {
+        color: #1e293b;
+        margin-bottom: 20px;
+        font-size: 1.3rem;
+    }
+
+    .file-item {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 15px;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .file-item:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .file-info {
+        flex: 1;
+    }
+
+    .file-name {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 5px;
+    }
+
+    .file-meta {
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .download-btn {
+        background: #10b981;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .download-btn:hover {
+        background: #059669;
+        transform: translateY(-1px);
+    }
+
+    .delete-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    .status-message {
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+        font-weight: 500;
+    }
+
+    .status-success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .status-error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #4f46e5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .content {
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+        }
+        
+        .file-item {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .file-actions {
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .logout-btn {
+            position: relative;
+            top: 0;
+            right: 0;
+            margin-top: 20px;
+            width: 100%;
+        }
+    }
+</style>
+```
+
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <div class="lock-icon">🔐</div>
+            <h2 class="login-title">Akses Terbatas</h2>
+            <p class="login-subtitle">Masukkan password untuk mengakses aplikasi</p>
+
+```
+        <form id="loginForm">
+            <input 
+                type="password" 
+                id="passwordInput" 
+                class="password-input" 
+                placeholder="Masukkan password..."
+                required
+            >
+            <button type="submit" class="login-btn" id="loginBtn">
+                🚀 Masuk
+            </button>
+        </form>
+        
+        <div id="loginError"></div>
+    </div>
+</div>
+
+<!-- Main Application -->
+<div id="mainApp" class="main-app">
+    <div class="container">
+        <div class="header" style="position: relative;">
+            <button class="logout-btn" onclick="logout()">🚪 Keluar</button>
+            <h1>📁 File Transfer</h1>
+            <p>Upload dari tablet, download di PC - Mudah & Aman</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-section" id="uploadArea">
+                <div class="upload-icon">☁️</div>
+                <h3>Drag & Drop file di sini atau klik untuk memilih</h3>
+                <p style="color: #64748b; margin: 10px 0;">Maksimal 10MB per file</p>
+                <input type="file" id="fileInput" class="file-input" multiple>
+                <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                    Pilih File
+                </button>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div id="statusMessage"></div>
+
+            <div class="files-list">
+                <h3>📋 File Tersimpan</h3>
+                <div id="filesList">
+                    <div style="text-align: center; color: #64748b; padding: 20px;">
+                        <div class="loading"></div>
+                        Memuat file...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+    // KONFIGURASI PASSWORD - GANTI DENGAN PASSWORD ANDA
+    const APP_PASSWORD = "mySecretPassword123"; // ⚠️ GANTI DENGAN PASSWORD ANDA
+
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL, listAll, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+    // KONFIGURASI FIREBASE - GANTI DENGAN CONFIG ANDA
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const storage = getStorage(app);
+    const db = getFirestore(app);
+
+    // DOM Elements
+    const loginScreen = document.getElementById('loginScreen');
+    const mainApp = document.getElementById('mainApp');
+    const loginForm = document.getElementById('loginForm');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginError = document.getElementById('loginError');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const progressBar = document.getElementById('progressBar');
+    const progressFill = document.getElementById('progressFill');
+    const statusMessage = document.getElementById('statusMessage');
+    const filesList = document.getElementById('filesList');
+
+    // Check if user is already logged in
+    function checkLogin() {
+        const isLoggedIn = sessionStorage.getItem('fileTransferAuth') === 'true';
+        if (isLoggedIn) {
+            showMainApp();
+        } else {
+            showLoginScreen();
+        }
+    }
+
+    // Show login screen
+    function showLoginScreen() {
+        loginScreen.style.display = 'flex';
+        mainApp.style.display = 'none';
+        passwordInput.focus();
+    }
+
+    // Show main application
+    function showMainApp() {
+        loginScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        loadFiles();
+    }
+
+    // Handle login form submission
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const enteredPassword = passwordInput.value;
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<div class="loading"></div>Memeriksa...';
+        
+        // Simulate checking password (add delay for security)
+        setTimeout(() => {
+            if (enteredPassword === APP_PASSWORD) {
+                sessionStorage.setItem('fileTransferAuth', 'true');
+                showMainApp();
+                passwordInput.value = '';
+                loginError.innerHTML = '';
+            } else {
+                loginError.innerHTML = '<div class="error-message">❌ Password salah! Coba lagi.</div>';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+            
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '🚀 Masuk';
+        }, 1000);
+    });
+
+    // Logout function
+    window.logout = function() {
+        if (confirm('Yakin ingin keluar?')) {
+            sessionStorage.removeItem('fileTransferAuth');
+            showLoginScreen();
+            passwordInput.value = '';
+        }
+    };
+
+    // Auto logout after 2 hours of inactivity
+    let inactivityTimer;
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            alert('Sesi berakhir karena tidak aktif. Silakan login ulang.');
+            logout();
+        }, 2 * 60 * 60 * 1000); // 2 hours
+    }
+
+    // Reset timer on user activity
+    document.addEventListener('mousedown', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('touchstart', resetInactivityTimer);
+
+    // Drag and Drop functionality
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        handleFiles(e.target.files);
+    });
+
+    // Handle file upload
+    async function handleFiles(files) {
+        for (let file of files) {
+            if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                showStatus('File ' + file.name + ' terlalu besar (maksimal 10MB)', 'error');
+                continue;
+            }
+            await uploadFile(file);
+        }
+    }
+
+    // Upload file to Firebase Storage
+    async function uploadFile(file) {
+        const fileName = Date.now() + '_' + file.name;
+        const storageRef = ref(storage, 'uploads/' + fileName);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+
+        progressBar.style.display = 'block';
+
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                progressFill.style.width = progress + '%';
+            },
+            (error) => {
+                showStatus('Error upload: ' + error.message, 'error');
+                progressBar.style.display = 'none';
+            },
+            async () => {
+                try {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    
+                    // Save metadata to Firestore
+                    await addDoc(collection(db, 'files'), {
+                        name: file.name,
+                        fileName: fileName,
+                        size: file.size,
+                        type: file.type,
+                        url: downloadURL,
+                        uploadTime: serverTimestamp()
+                    });
+
+                    showStatus('File ' + file.name + ' berhasil diupload!', 'success');
+                    progressBar.style.display = 'none';
+                    loadFiles();
+                } catch (error) {
+                    showStatus('Error menyimpan metadata: ' + error.message, 'error');
+                    progressBar.style.display = 'none';
+                }
+            }
+        );
+    }
+
+    // Load files from Firestore
+    async function loadFiles() {
+        try {
+            const querySnapshot = await getDocs(collection(db, 'files'));
+            const files = [];
+            
+            querySnapshot.forEach((doc) => {
+                files.push({ id: doc.id, ...doc.data() });
+            });
+
+            // Sort by upload time (newest first)
+            files.sort((a, b) => {
+                if (a.uploadTime && b.uploadTime) {
+                    return b.uploadTime.toDate() - a.uploadTime.toDate();
+                }
+                return 0;
+            });
+
+            displayFiles(files);
+        } catch (error) {
+            showStatus('Error memuat file: ' + error.message, 'error');
+            filesList.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 20px;">Gagal memuat file</div>';
+        }
+    }
+
+    // Display files in the UI
+    function displayFiles(files) {
+        if (files.length === 0) {
+            filesList.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">Belum ada file yang diupload</div>';
+            return;
+        }
+
+        filesList.innerHTML = files.map(file => `
+            <div class="file-item">
+                <div class="file-info">
+                    <div class="file-name">📄 ${file.name}</div>
+                    <div class="file-meta">
+                        ${formatFileSize(file.size)} • ${file.uploadTime ? formatDate(file.uploadTime.toDate()) : 'Waktu tidak diketahui'}
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="download-btn" onclick="downloadFile('${file.url}', '${file.name}')">
+                        ⬇️ Download
+                    </button>
+                    <button class="delete-btn" onclick="deleteFile('${file.id}', '${file.fileName}')">
+                        🗑️ Hapus
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Download file
+    window.downloadFile = function(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    // Delete file
+    window.deleteFile = async function(docId, fileName) {
+        if (!confirm('Yakin ingin menghapus file ini?')) return;
+
+        try {
+            // Delete from Storage
+            const storageRef = ref(storage, 'uploads/' + fileName);
+            await deleteObject(storageRef);
+
+            // Delete from Firestore
+            await deleteDoc(doc(db, 'files', docId));
+
+            showStatus('File berhasil dihapus!', 'success');
+            loadFiles();
+        } catch (error) {
+            showStatus('Error menghapus file: ' + error.message, 'error');
+        }
+    };
+
+    // Utility functions
+    function showStatus(message, type) {
+        statusMessage.innerHTML = `<div class="status-message status-${type}">${message}</div>`;
+        setTimeout(() => {
+            statusMessage.innerHTML = '';
+        }, 5000);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function formatDate(date) {
+        return date.toLocaleDateString('id-ID') + ' ' + date.toLocaleTimeString('id-ID');
+    }
+
+    // Initialize app
+    checkLogin();
+    resetInactivityTimer();
+</script>
+```
+
+</body>
+</html>
